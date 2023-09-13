@@ -5,10 +5,61 @@ import { MsgValidatorBond } from '@hoangdv2429/liquid_staking/dist/codegen/staki
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { AminoConverter } from '@hoangdv2429/liquid_staking/dist/codegen/staking/v1beta1/tx.amino';
 
+const testnetchainid = 'theta-testnet-001'
+const testnetrpc = 'https://rpc.sentry-02.theta-testnet.polypore.xyz/'
+
+const experimentalChain = {
+  chainId: testnetchainid,
+  chainName: "cosmos testnet",
+  rpc: "https://rpc.sentry-02.theta-testnet.polypore.xyz/",
+  rest: "https://rest.sentry-02.theta-testnet.polypore.xyz/",
+  bip44: {
+      coinType: 118,
+  },
+  bech32Config: {
+      bech32PrefixAccAddr: "cosmos",
+      bech32PrefixAccPub: "cosmos" + "pub",
+      bech32PrefixValAddr: "cosmos" + "valoper",
+      bech32PrefixValPub: "cosmos" + "valoperpub",
+      bech32PrefixConsAddr: "cosmos" + "valcons",
+      bech32PrefixConsPub: "cosmos" + "valconspub",
+  },
+  currencies: [
+      {
+          coinDenom: "atom",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+          coinGeckoId: "na",
+      },
+  ],
+  feeCurrencies: [
+      {
+          coinDenom: "atom",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+          coinGeckoId: "na",
+      },
+  ],
+  stakeCurrency: {
+      coinDenom: "atom",
+      coinMinimalDenom: "uatom",
+      coinDecimals: 6,
+      coinGeckoId: "na",
+  },
+  gasPriceStep: {
+      low: 0.01,
+      average: 0.025,
+      high: 0.03,
+  },
+}
+
+
+
 const chanId = 'cosmoshub-4'
-const defaultGas = '40000'
+const defaultGas = '100000'
 const rpc = 'https://rpc-cosmoshub-ia.cosmosia.notional.ventures/'
 const typeUrl = '/liquidstaking.staking.v1beta1.MsgValidatorBond'
+const gaiaTypeUrl = '/cosmos.staking.v1beta1.MsgValidatorBond'
 
 const getOfflineSigner = async (chainId) => {
   try {
@@ -19,8 +70,6 @@ const getOfflineSigner = async (chainId) => {
       try {
         await window.keplr.enable(chainId);
       } catch (e) {
-        const experimentalChain = chainObj[chainId];
-        if (!experimentalChain) throw e;
         await window.keplr.experimentalSuggestChain(experimentalChain);
       }
       const offlineSigner = window.keplr.getOfflineSigner(chainId);
@@ -37,13 +86,13 @@ const getOfflineSigner = async (chainId) => {
 
 const getStargateClient = async (signer, rpc) => {
   const client = await SigningStargateClient.connectWithSigner(rpc, signer);
-  client.aminoTypes.register[typeUrl] = {
+  client.aminoTypes.register[gaiaTypeUrl] = {
     aminoType: AminoConverter[typeUrl].aminoType,
     toAmino: AminoConverter[typeUrl].toAmino,
     fromAmino: AminoConverter[typeUrl].fromAmino,
   }
 
-  client.registry.register(typeUrl, MsgValidatorBond)
+  client.registry.register(gaiaTypeUrl, MsgValidatorBond)
 
   return client;
 };
@@ -71,7 +120,7 @@ export default function Home() {
       })
 
       const msg = {
-        typeUrl: typeUrl,
+        typeUrl: gaiaTypeUrl,
         value: msgBody,
       };
       const { account, offlineSigner } = await getOfflineSigner(
@@ -84,7 +133,11 @@ export default function Home() {
 
       const stargate = await getStargateClient(offlineSigner, rpc);
       if (stargate != null) {
-        await stargate.signAndBroadcast(account.bech32Address, [msg], fee, "From Notional with love");
+       const res = await stargate.signAndBroadcast(account.bech32Address, [msg], fee, "From Notional with love");
+       if (res.code !== 0) {
+        console.log(res)
+        throw new Error(res.rawLog)
+       }
       }
       toast({
         position: 'top-right',
