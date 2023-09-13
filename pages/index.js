@@ -195,7 +195,7 @@ export default function Home() {
                 </Text>
                 <Input placeholder='address here' onBlur={(e) => handleChange('validatorAddress', e.target.value)} />
               </Center>
-              <Button color='white' backgroundColor={'#ff513d'} _hover={{ backgroundColor: '#ad3628' }} onClick={validatorBond} isDisabled={checkDisable()}>
+              <Button color='white' backgroundColor={'#ff513d'} _hover={{ backgroundColor: '#ad3628' }} onClick={validatorBond} >
                 Validator Bond
               </Button>
             </Grid>
