@@ -56,7 +56,7 @@ const experimentalChain = {
 
 
 const chanId = 'cosmoshub-4'
-const defaultGas = '100000'
+const defaultGas = '200000'
 const rpc = 'https://rpc-cosmoshub-ia.cosmosia.notional.ventures/'
 const typeUrl = '/liquidstaking.staking.v1beta1.MsgValidatorBond'
 const gaiaTypeUrl = '/cosmos.staking.v1beta1.MsgValidatorBond'
