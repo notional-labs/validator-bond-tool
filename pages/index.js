@@ -87,7 +87,7 @@ const getOfflineSigner = async (chainId) => {
 const getStargateClient = async (signer, rpc) => {
   const client = await SigningStargateClient.connectWithSigner(rpc, signer);
   client.aminoTypes.register[gaiaTypeUrl] = {
-    aminoType: AminoConverter[typeUrl].aminoType,
+    aminoType: gaiaTypeUrl,
     toAmino: AminoConverter[typeUrl].toAmino,
     fromAmino: AminoConverter[typeUrl].fromAmino,
   }
