@@ -115,6 +115,7 @@ export default function Home() {
 
   const validatorBond = async () => {
     try {
+      console.log('hello')
       const msgBody = MsgValidatorBond.fromPartial({
         ...info,
       })
