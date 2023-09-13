@@ -27,7 +27,7 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/github@web-server-1
           cd ~/validator-bond-tool
-          export PATH=/root/.nvm/versions/node/v19.1.0/bin/:$PATH
+          export PATH=/root/.nvm/versions/node/v18.9.0/bin/:$PATH
           git stash save --keep-index --include-untracked
           git pull
 
