@@ -140,7 +140,7 @@ export default function Home() {
 
       const stargate = await getStargateClient(offlineSigner, rpc);
       if (stargate != null) {
-       const res = await stargate.signAndBroadcast(account.bech32Address, [msg], fee, "From Notional with love");
+       const res = await stargate.signAndBroadcast(account.bech32Address, [msg], fee, "lsm.notional.ventures");
        if (res.code !== 0) {
         console.log(res)
         throw new Error(res.rawLog)
