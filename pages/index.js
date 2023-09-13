@@ -45,7 +45,6 @@ const getStargateClient = async (signer, rpc) => {
 
   client.registry.register(typeUrl, MsgValidatorBond)
 
-  console.log(client.registry.types.get(typeUrl))
   return client;
 };
 
@@ -84,9 +83,8 @@ export default function Home() {
       };
 
       const stargate = await getStargateClient(offlineSigner, rpc);
-      console.log(stargate.registry)
       if (stargate != null) {
-        await stargate.sign(account.bech32Address, [msg], fee, "");
+        await stargate.signAndBroadcast(account.bech32Address, [msg], fee, "From Notional with love");
       }
       toast({
         position: 'top-right',
