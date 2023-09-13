@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { Input, Text, ChakraProvider, Center, Link, Flex, Grid, Button, Heading, Box, useToast } from '@chakra-ui/react';
+import { Input, Text, ChakraProvider, Center, Link, Flex, Grid, Button, Heading, Box, useToast, Switch } from '@chakra-ui/react';
 import { useState } from 'react';
 import { MsgValidatorBond } from '@hoangdv2429/liquid_staking/dist/codegen/staking/v1beta1/tx';
 import { SigningStargateClient } from "@cosmjs/stargate";
@@ -60,8 +60,9 @@ const defaultGas = '100000'
 const rpc = 'https://rpc-cosmoshub-ia.cosmosia.notional.ventures/'
 const typeUrl = '/liquidstaking.staking.v1beta1.MsgValidatorBond'
 const gaiaTypeUrl = '/cosmos.staking.v1beta1.MsgValidatorBond'
+const aminoTypeUrl = 'cosmos-sdk/MsgValidatorBond'
 
-const getOfflineSigner = async (chainId) => {
+const getOfflineSigner = async (chainId, isAmino) => {
   try {
     if (!window.getOfflineSigner || !window.keplr) {
       alert("Keplr Wallet not detected, please install extension");
@@ -72,7 +73,12 @@ const getOfflineSigner = async (chainId) => {
       } catch (e) {
         await window.keplr.experimentalSuggestChain(experimentalChain);
       }
-      const offlineSigner = window.keplr.getOfflineSigner(chainId);
+      let offlineSigner
+      if (isAmino) {
+        offlineSigner = window.keplr.getOfflineSignerOnlyAmino(chainId);
+      } else {
+        offlineSigner = window.keplr.getOfflineSigner(chainId);
+      }
       const account = await window.keplr.getKey(chainId);
       return {
         account,
@@ -87,7 +93,7 @@ const getOfflineSigner = async (chainId) => {
 const getStargateClient = async (signer, rpc) => {
   const client = await SigningStargateClient.connectWithSigner(rpc, signer);
   client.aminoTypes.register[gaiaTypeUrl] = {
-    aminoType: AminoConverter[typeUrl].aminoType,
+    aminoType: aminoTypeUrl,
     toAmino: AminoConverter[typeUrl].toAmino,
     fromAmino: AminoConverter[typeUrl].fromAmino,
   }
@@ -104,6 +110,7 @@ export default function Home() {
     delegatorAddress: '',
     validatorAddress: ''
   })
+  const [isAmino, setIsAmino] = useState(false)
 
   const handleChange = (key, value) => {
     let newInfor = info
@@ -115,7 +122,6 @@ export default function Home() {
 
   const validatorBond = async () => {
     try {
-      console.log('hello')
       const msgBody = MsgValidatorBond.fromPartial({
         ...info,
       })
@@ -125,7 +131,7 @@ export default function Home() {
         value: msgBody,
       };
       const { account, offlineSigner } = await getOfflineSigner(
-        chanId
+        chanId, isAmino
       );
       const fee = {
         amount: [],
@@ -196,6 +202,9 @@ export default function Home() {
                 </Text>
                 <Input placeholder='address here' onBlur={(e) => handleChange('validatorAddress', e.target.value)} />
               </Center>
+              <Switch value={isAmino} onChange={(e) => setIsAmino(e.target.checked)}>
+                Enable amino sign
+              </Switch>
               <Button color='white' backgroundColor={'#ff513d'} _hover={{ backgroundColor: '#ad3628' }} onClick={validatorBond} >
                 Validator Bond
               </Button>
